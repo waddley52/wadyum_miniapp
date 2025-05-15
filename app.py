@@ -76,7 +76,7 @@ def get_ohlcv(symbol):
 
 @app.route('/')
 def home():
-    return render_template('dashboard.html')
+    return redirect('/miniapp')
 
 @app.route('/miniapp')
 def miniapp():
