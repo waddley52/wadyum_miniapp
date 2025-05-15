@@ -6,9 +6,7 @@ import numpy as np
 
 app = Flask(__name__)
 
-# --- Teknik Göstergeler ---
-import requests
-
+# --- TradingView Proxy Üzerinden OHLCV ---
 def get_ohlcv(symbol):
     try:
         symbol = symbol.replace("/", "")  # ETH/USDT → ETHUSDT
@@ -27,7 +25,6 @@ def get_ohlcv(symbol):
         df = df.astype(float)
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-        # EMA, RSI vb. tüm teknik hesaplamalar burada kalabilir
         df['ema_8'] = df['close'].ewm(span=8).mean()
         df['ema_21'] = df['close'].ewm(span=21).mean()
         df['ema_55'] = df['close'].ewm(span=55).mean()
@@ -99,11 +96,10 @@ def home():
 def miniapp():
     return render_template('miniapp.html')
 
-
 @app.route('/analiz')
 def analiz():
     coin = request.args.get("coin", "ETH/USDT").upper()
-    market = coin  # coin zaten "BTC/USDT" gibi geliyor, değiştirme
+    market = coin
     df = get_ohlcv(market)
     if df is None or df.empty:
         return "Veri alınamadı."
@@ -125,14 +121,14 @@ def analiz():
         long_why.append("✅ Supertrend YUKARI")
     else:
         short_score += 2.6
-        short_why.append("✅ Supertrend AŞAĞI")
+        short_why.append("✅ Supertrend AŞaĞI")
 
     if last['ema_8'] > last['ema_21'] > last['ema_55'] > last['ema_89'] > last['ema_144']:
         long_score += 2.4
         long_why.append("✅ EMA Ribbon YUKARI")
     elif last['ema_8'] < last['ema_21'] < last['ema_55'] < last['ema_89'] < last['ema_144']:
         short_score += 2.4
-        short_why.append("✅ EMA Ribbon AŞAĞI")
+        short_why.append("✅ EMA Ribbon AŞaĞI")
 
     if last['close'] > last['bb_upper']:
         short_score += 1.0
