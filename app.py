@@ -1,20 +1,33 @@
+import requests
 from flask import Flask, render_template, request
 from flask import redirect
 import pandas as pd
 import numpy as np
-import ccxt
 
 app = Flask(__name__)
-exchange = ccxt.binance()
 
 # --- Teknik Göstergeler ---
+import requests
+
 def get_ohlcv(symbol):
     try:
-        data = exchange.fetch_ohlcv(symbol, timeframe='15m', limit=100)
-        df = pd.DataFrame(data, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+        symbol = symbol.replace("/", "")  # ETH/USDT → ETHUSDT
+        url = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=15m&limit=100"
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(f"[HATA - {symbol}]: {response.status_code} - {response.text}")
+            return None
+
+        data = response.json()
+        df = pd.DataFrame(data, columns=[
+            'timestamp', 'open', 'high', 'low', 'close', 'volume',
+            '_1', '_2', '_3', '_4', '_5', '_6'
+        ])
+        df = df[['timestamp', 'open', 'high', 'low', 'close', 'volume']]
+        df = df.astype(float)
         df['timestamp'] = pd.to_datetime(df['timestamp'], unit='ms')
 
-        # Göstergeler
+        # EMA, RSI vb. tüm teknik hesaplamalar burada kalabilir
         df['ema_8'] = df['close'].ewm(span=8).mean()
         df['ema_21'] = df['close'].ewm(span=21).mean()
         df['ema_55'] = df['close'].ewm(span=55).mean()
@@ -72,8 +85,9 @@ def get_ohlcv(symbol):
         df['supertrend'] = df['close'] > (sma - 2 * std)
 
         return df
+
     except Exception as e:
-        print(f"[HATA - {symbol}]: {e}")  # Hata terminalde görünür
+        print(f"[HATA - {symbol}]: {e}")
         return None
 
 
