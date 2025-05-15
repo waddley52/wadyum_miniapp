@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Wadyum MiniApp</title>
+  <style>
+    body { background: #111; color: white; font-family: Arial; text-align: center; padding: 30px; }
+    input, button { padding: 10px; font-size: 16px; margin: 10px; }
+    #sonuc { margin-top: 20px; text-align: left; white-space: pre-line; background: #222; padding: 15px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+  <h2>📊 Wadyum MiniApp</h2>
+  <p>Analiz almak istediğiniz coin'i yazınız (örnek: <b>SOL/USDT</b>):</p>
+  <input type="text" id="coin" placeholder="BTC/USDT" />
+  <button onclick="analiz()">📈 Analiz Et</button>
+
+  <div id="sonuc"></div>
+
+  <script>
+    async function analiz() {
+      const coin = document.getElementById('coin').value;
+      const res = await fetch(`/analiz?coin=${coin}`);
+      const text = await res.text();
+      document.getElementById('sonuc').innerText = text;
+    }
+  </script>
+</body>
+</html>
