@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request
+from flask import redirect
 import pandas as pd
 import numpy as np
 import ccxt
