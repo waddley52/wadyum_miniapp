@@ -72,8 +72,10 @@ def get_ohlcv(symbol):
         df['supertrend'] = df['close'] > (sma - 2 * std)
 
         return df
-    except:
+    except Exception as e:
+        print(f"[HATA - {symbol}]: {e}")  # Hata terminalde görünür
         return None
+
 
 @app.route('/')
 def home():
@@ -87,7 +89,7 @@ def miniapp():
 @app.route('/analiz')
 def analiz():
     coin = request.args.get("coin", "ETH/USDT").upper()
-    market = coin.replace("/", "")
+    market = coin  # coin zaten "BTC/USDT" gibi geliyor, değiştirme
     df = get_ohlcv(market)
     if df is None or df.empty:
         return "Veri alınamadı."
